@@ -1,0 +1,4 @@
+crcmod==1.7
+-e git://github.com/fmfi-svt-gate/libmfrc522.py@27e1de4be796945b9a9d37fa03c4609a8afdf4f4#egg=libmfrc522-master
+-e git://github.com/fmfi-svt-gate/libreader.py@c1b695b27a4003b934841dc17322bc5321510cf3#egg=libreader-master
+pyserial==2.7
