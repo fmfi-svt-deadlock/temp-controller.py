@@ -7,6 +7,7 @@ import serial
 from gatereader.reader import Reader, PacketId
 from mfrc522.mfrc522 import MFRC522, NoTagError, TransmissionError
 from mfrc522.iso14443com import *
+from textaccess import access_init, is_cleared
 
 logger = logging.getLogger('controller')
 logger.setLevel(logging.DEBUG)
@@ -48,13 +49,19 @@ def main(device='/dev/ttyUSB0'):
             try:
                 uid = get_id(module)
                 if uid is not None and last_uid != uid:
+                    number = int.from_bytes(uid, byteorder='little')
                     logger.info(
                         'Card detected: '
                         + ' '.join('{:02x}'.format(x) for x in uid)
                         + ' -- '
-                        + str(int.from_bytes(uid, byteorder='little'))
+                        + str(number)
                     )
-                    reader.beep([(880, 200)])
+                    if is_cleared(number):
+                        logger.info('Access granted for ' + str(number))
+                        reader.beep([(900, 600)])
+                    else:
+                        logger.warn('Access denied for ' + str(number))
+                        reader.beep([(220, 80), (0, 80)]*3)
                     last_uid = uid
             except NoTagError:
                 reader.set_leds(0)
@@ -63,6 +70,8 @@ def main(device='/dev/ttyUSB0'):
             reader.set_leds(0)
 
 if __name__ == '__main__':
+    access_init()
+    logger.info('Access controller initialized')
     while True:
         try:
             logger.info('Controller launch!')
